@@ -1,0 +1,16 @@
+{
+  "name": "database-interaction-with-postgresql-and-application-programming-practice",
+  "version": "1.0.0",
+  "description": "Objective: Implement a PostgreSQL database using the provided schema and write an application in Javascript that connects to this database to perform specific CRUD (Create, Read, Update, Delete) operations.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "pg": "^8.16.3"
+  }
+}
