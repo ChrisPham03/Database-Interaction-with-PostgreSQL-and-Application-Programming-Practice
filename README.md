@@ -1,18 +1,44 @@
-# Database-Interaction-with-PostgreSQL-and-Application-Programming-Practice
-Objective: Implement a PostgreSQL database using the provided schema and write an application in Javascript that connects to this database to perform specific CRUD (Create, Read, Update, Delete) operations.
+## QUANG MINH PHAM
+## 101300755
 
+# Database Interaction with PostgreSQL and Node.js
 
-# TECH USED
-JavaScript Node JS 
-Postgres SQL
+This project is an application built with Node.js that connects to a PostgreSQL database. It demonstrates fundamental CRUD (Create, Read, Update, Delete) operations on a `students` table as required for a database systems assignment.
 
-# Set Up Instruction 
-HOW TO CLONE FROM GIT:
-URL: https://github.com/ChrisPham03/Database-Interaction-with-PostgreSQL-and-Application-Programming-Practice.git
-HOW TO SET UP POSTGRES SQL: 
+## 🛠️ Technology Stack
 
-SCHEMA
+  * **Application:** Node.js
+  * **Database:** PostgreSQL
+  * **Driver:** `node-postgres` (pg)
+  * **Configuration:** `dotenv` (for managing environment variables)
 
+## 🎥 Video Demonstration
+
+https://docs.google.com/presentation/d/1qWytRJbAJLNVN9pudHmWlLhGIyBLjF6kxorRiVIzPeQ/edit?usp=sharing
+
+## 🚀 Setup and Installation
+
+Follow these steps to set up the database and run the application.
+
+### 1\. Clone the Repository
+
+```bash
+git clone https://github.com/ChrisPham03/Database-Interaction-with-PostgreSQL-and-Application-Programming-Practice.git
+cd Database-Interaction-with-PostgreSQL-and-Application-Programming-Practice
+```
+
+### 2\. Database Setup (PostgreSQL)
+
+Before running the app, you must create the database and table.
+
+1.  Open your PostgreSQL tool (like **pgAdmin** or `psql`).
+2.  Create a new database.
+3.  Run the following SQL script to **create the table** and **insert the initial data**:
+
+<!-- end list -->
+
+```sql
+-- Create the table structure
 CREATE TABLE students (
     student_id SERIAL PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,
@@ -21,29 +47,58 @@ CREATE TABLE students (
     enrollment_date DATE
 );
 
-PROJECCT DIRECTORY STRUCTURE 
-# main (all main function in here)
-app.js
-function inside:
-testconnect
-getAllStudents(): Retrieves and displays all records from the students table.
-addStudent(first_name, last_name, email, enrollment_date): Inserts a new student record into the students table.
-updateStudentEmail(student_id, new_email): Updates the email address for a student with the specified student_id.
-deleteStudent(student_id): Deletes the record of the student with the specified student_id.
-main(): this main running all the function and log the result for testing interaction
-# environment variable control 
-.env
-Note: .env wont be show in the repo as it was ignore for safety, avoid credential leak
-The variables details: 
-DB_USER=username
-DB_HOST=localhost
-DB_DATABASE=databasename
-DB_PASSWORD=*****
-DB_PORT=5432
-# dependencies configuration
-package.json
-package-lock.json 
-# document 
-README.md
+-- Insert the initial data
+INSERT INTO students (first_name, last_name, email, enrollment_date) VALUES
+('John', 'Doe', 'john.doe@example.com', '2023-09-01'),
+('Jane', 'Smith', 'jane.smith@example.com', '2023-09-01'),
+('Jim', 'Beam', 'jim.beam@example.com', '2023-09-02');
 
-Video link:
+
+```
+
+### 3\. Application Setup (Node.js)
+
+**a. Install Dependencies**
+
+Open your terminal in the project folder and run:
+
+```bash
+npm install
+```
+
+**b. Set Up Environment Variables**
+
+This project uses a `.env` file to securely store your database credentials. This file is ignored by Git and will not be uploaded to the repository.
+
+1.  Create a new file in the root of the project named `.env`
+2.  Copy and paste the text below into the file, replacing the values with your **own** database credentials.
+
+<!-- end list -->
+
+```
+# .env file
+
+DB_USER=your_postgres_username
+DB_HOST=localhost
+DB_DATABASE=name_of_your_database
+DB_PASSWORD=your_secret_password
+DB_PORT=5432
+```
+
+## ▶️ Running the Application
+
+Once the setup is complete, run the application from your terminal using command node app.js :
+
+```bash
+node app.js
+```
+
+The script will automatically connect to the database and execute the following functions in order, logging the results to the console:
+
+1.  **`testConnection()`**: Verifies that the connection to the database is successful.
+2.  **`getAllStudents()`**: Shows the initial list of students.
+3.  **`addStudent()`**: Adds a new student to the table.
+4.  **`updateStudentEmail()`**: Updates the email of a specific student.
+6.  **`getAllStudents()`**: Shows the final list of students to demonstrate the changes.
+
+-----

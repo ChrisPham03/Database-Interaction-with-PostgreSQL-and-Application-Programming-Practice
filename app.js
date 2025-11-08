@@ -1,7 +1,23 @@
-// Import the Pool object from the 'pg' library
+/**
+ * @file app.js
+ * @description Main application file for demonstrating CRUD operations
+ * on a PostgreSQL 'students' table using Node.js and node-postgres.
+ */
+
+// Import the Pool object from 'pg' for database connection pooling
+// Reason: Efficiently manages multiple connections to the database.
 const { Pool } = require('pg');
-require('dotenv').config(); // Load environment variables from .env file
-// Configure the connection details for your database
+
+// Import and configure dotenv to be able to load environment variables from .env file
+// Reason: Keeps sensitive information like DB credentials out of the source code.
+require('dotenv').config();
+
+/**
+ * Configure the connection pool.
+ * A Pool is used instead of a single Client for efficiency, as it
+ * manages a "pool" of connections that can be leased and reused,
+ * saving the overhead of creating a new connection for every query.
+ */
 const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
@@ -10,33 +26,42 @@ const pool = new Pool({
     port: process.env.DB_PORT,
 });
 
-// A quick test function to see if we can connect
+/**
+ * Verifies the database connection by leasing a client from the pool
+ * and immediately releasing it.
+ */
 async function testConnection() {
+    let client; // Declare client outside try to access in finally
     try {
-         // Try to get a client from the pool
-        const client = await pool.connect();
-        console.log('Successfully connected');
-        // Release the client back to the pool
-        client.release(); 
+        // Try to get a client from the pool
+        client = await pool.connect();
+        console.log('Successfully connected to PostgreSQL!');
     } catch (err) {
         console.error('Error connecting', err.stack);
+    } finally {
+        // **Crucial:** Always release the client back to the pool
+        // This ensures the connection is available for other operations.
+        if (client) {
+            client.release();
+        }
     }
 }
 
 /**
  * Retrieve and display all students from the 'students' table.
  */
-async function getAllStudents(){
+async function getAllStudents() {
     let client;
     try {
         client = await pool.connect();
-        const res = await client.query('SELECT * FROM students;');
-        console.table(res.rows)
-    }
-    catch (err) {
+        const sql = 'SELECT * FROM students;';
+        const res = await client.query(sql);
+        console.log('--- All Students ---');
+        console.table(res.rows);
+    } catch (err) {
         console.error('Error executing query', err.stack);
-    }
-    finally {
+    } finally {
+        // Ensure the client is always released, even if the query fails.
         if (client) {
             client.release();
         }
@@ -48,25 +73,21 @@ async function getAllStudents(){
  * @param {string} first_name - The first name of the student.
  * @param {string} last_name - The last name of the student.
  * @param {string} email - The email address of the student.
- * @param {string} enrollment_date - The enrollment date of the student (YYYY-MM-DD).
+ * @param {string} enrollment_date - The enrollment date (YYYY-MM-DD).
  */
-async function addStudent(first_name, last_name, email, enrollment_date){
+async function addStudent(first_name, last_name, email, enrollment_date) {
     let client;
+    // Uses a parameterized query ($1, $2...) to prevent SQL injection.
+    const insertQuery = 'INSERT INTO students (first_name, last_name, email, enrollment_date) VALUES ($1, $2, $3, $4);';
+    const values = [first_name, last_name, email, enrollment_date];
+
     try {
         client = await pool.connect();
-        /* For the querry implement, I used parameterized query to prevent SQL injection. 
-           Although not required, but I think it would be a good practice.
-        */
-        const insertQuery = 'INSERT INTO students (first_name, last_name, email, enrollment_date) VALUES ($1, $2, $3, $4);';
-        const values = [first_name, last_name, email, enrollment_date];
-        const res = await client.query(insertQuery, values);
+        await client.query(insertQuery, values);
         console.log('Student added successfully');
-
-    }
-    catch (err) {
+    } catch (err) {
         console.error('Error executing query', err.stack);
-    }
-    finally {
+    } finally {
         if (client) {
             client.release();
         }
@@ -78,26 +99,25 @@ async function addStudent(first_name, last_name, email, enrollment_date){
  * @param {number} student_id - The ID of the student to update.
  * @param {string} new_email - The new email address.
  */
-async function  updateStudentEmail(student_id, new_email){
+async function updateStudentEmail(student_id, new_email) {
     let client;
+    // Parameterized query prevents SQL injection.
+    const updateQuery = 'UPDATE students SET email = $1 WHERE student_id = $2;';
+    const values = [new_email, student_id];
+
     try {
         client = await pool.connect();
-        /* For the querry implement, I used parameterized query to prevent SQL injection. 
-           Although not required, but I think it would be a good practice.
-        */
-        const updateQuery = 'UPDATE students SET email = $1 WHERE student_id = $2;';
-        const values = [new_email, student_id];
         const res = await client.query(updateQuery, values);
+        
+        // Provide intuitive feedback on whether the update was successful
         if (res.rowCount > 0) {
             console.log(`Successfully updated email for student ID: ${student_id}`);
         } else {
             console.log(`No student found with ID: ${student_id}`);
         }
-    }
-    catch (err) {
+    } catch (err) {
         console.error('Error executing query', err.stack);
-    }
-    finally {
+    } finally {
         if (client) {
             client.release();
         }
@@ -105,57 +125,65 @@ async function  updateStudentEmail(student_id, new_email){
 }
 
 /**
- * Delete student by ID from the table.
- * @param {number} student_id - The ID of the student to update.
+ * Deletes a student from the 'students' table by their ID.
+ * @param {number} student_id - The ID of the student to delete.
  */
-async function deleteStudent(student_id){
+async function deleteStudent(student_id) {
     let client;
+    // Parameterized query prevents SQL injection.
+    const deleteQuery = 'DELETE FROM students WHERE student_id = $1;';
+    const values = [student_id];
+
     try {
         client = await pool.connect();
-         /* For the querry implement, I used parameterized query to prevent SQL injection. 
-           Although not required, but I think it would be a good practice.
-        */
-        const deleteQuery = 'DELETE FROM students WHERE student_id = $1;';
-        const values = [student_id];
         const res = await client.query(deleteQuery, values);
+        
+        // Provide feedback on whether the delete was successful
         if (res.rowCount > 0) {
             console.log(`Successfully deleted student ID: ${student_id}`);
         } else {
             console.log(`No student found with ID: ${student_id}`);
         }
-    }
-    catch (err) {
+    } catch (err) {
         console.error('Error executing query', err.stack);
-    }
-    finally {
+    } finally {
         if (client) {
             client.release();
         }
     }
 }
 
+/**
+ * Main function to orchestrate and demonstrate the CRUD operations.
+ */
 async function main() {
-// Run the test
-testConnection();
-// Test the new function
-await addStudent('Chris', 'Vietnam', 'chris@example.com', '2023-09-03');
-await addStudent('Bao', 'Vietnam', 'bao@example.com', '2023-09-03');
-await addStudent('Tom', 'Vietnam', 'tom@example.com', '2023-09-03');
-
-
-await getAllStudents(); // See the list after, with Alice!
-
-// Test the update function
-//await updateStudentEmail(1, 'alice.new@example.com'); // Assuming Alice is ID 1
+    // 1. Test the connection first
+    await testConnection();
     
-// See the list after
-//await getAllStudents();
+    // 2. Add a new student
+    // Note: This line should be commented out after the first run
+    // to avoid 'duplicate key' errors from the unique email constraint.
+    // await addStudent('Chris', 'Pham', 'chris@example.com', '2023-09-03');
 
-pool.end(); // This closes all connections and lets the script exit
+    // 3. Show all students
+    await getAllStudents();
 
+    // 4. Test the update function
+    // await updateStudentEmail(4, 'chris.new@example.com');
+    
+    // 5. Show all students again to see the update
+    // await getAllStudents();
 
+    // 6. Test the delete function
+    // await deleteStudent(1); // Deletes student with ID 1
+    
+    // 7. Show all students to confirm deletion
+    // await getAllStudents();
+
+    // Close all connections in the pool
+    // Reason: This allows the Node.js script to exit gracefully.
+    pool.end();
 }
 
-
-// Run main function!
+// Run the main orchestration function
 main();
