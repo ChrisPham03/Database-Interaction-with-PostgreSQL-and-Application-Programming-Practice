@@ -14,7 +14,7 @@ This project is an application built with Node.js that connects to a PostgreSQL 
 
 ## 🎥 Video Demonstration
 
-https://docs.google.com/presentation/d/1qWytRJbAJLNVN9pudHmWlLhGIyBLjF6kxorRiVIzPeQ/edit?usp=sharing
+https://drive.google.com/file/d/1dgu7d_3S8rTSc24AfTTVt1yfpQwnoOYC/view?usp=sharing
 
 ## 🚀 Setup and Installation
 
